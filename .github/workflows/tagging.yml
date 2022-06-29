@@ -4,7 +4,7 @@ on:
   push:
 
 env:
-  NEW_TAG: 0.0.1
+  NEW_TAG: 0.0.2
 
 jobs:
   tagging:
