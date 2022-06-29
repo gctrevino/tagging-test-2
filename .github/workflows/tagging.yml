@@ -18,7 +18,7 @@ jobs:
         run: |
           git describe && true || true
           if [ $? > 0 ]; then
-            echo "NEW_TAG=0.0.1" >> $GITHUB_ENV
+            echo "NEW_TAG=0.0.6" >> $GITHUB_ENV
           else
             MAJOR=$(git describe --tags | cut -f 1 -d. | cut -f 1 -d-)
             MINOR=$(git describe --tags | cut -f 2 -d. | cut -f 1 -d-)
