@@ -27,7 +27,7 @@ jobs:
           # fi
           # echo New Tag [ ${{ env.NEW_TAG }} ]
           # echo Cur SHA [ ${{ github.sha }} ]
-          echo "NEW_TAG=0.0.7" >> $GITHUB_ENV
+          echo "NEW_TAG=0.0.8" >> $GITHUB_ENV
 
       - name: Create Tag
         uses: actions/github-script@v3
@@ -60,12 +60,13 @@ jobs:
       - name: Annotate
         run: |
           # Also, if the lightweight tag already exists on remotes, do the following
-          git push origin :refs/tags/v1.0.2
+          git push origin :refs/tags/${{ env.NEW_TAG }}
           git push origin --tags
 
       - name: Test
         run: |
           git describe
+          git describe --tags
           git describe --all
 
   step2:
