@@ -22,7 +22,7 @@ jobs:
           else
             MAJOR=$(git describe --tags | cut -f 1 -d. | cut -f 1 -d-)
             MINOR=$(git describe --tags | cut -f 2 -d. | cut -f 1 -d-)
-            PATCH=$(( $(git describe --tags | cut -f 3 -d. | cut -f 1 -d-) + 1 ))
+            PATCH=$(( $(git describe --tags | cut -f 3 -d. | cut -f 1 -d-) + 5 ))
             echo "NEW_TAG=$MAJOR.$MINOR.$PATCH" >> $GITHUB_ENV
           fi
 
@@ -57,6 +57,12 @@ jobs:
                 core.setFailed(`Failed tagging. Reason: ${error}`);
               })
             });
+
+      - name: Annotate
+        run: |
+          # Also, if the lightweight tag already exists on remotes, do the following
+          git push origin :refs/tags/v1.0.2
+          git push origin --tags
 
       - name: Test
         run: |
