@@ -19,6 +19,7 @@ jobs:
       - name: Tagging
         run: |
           git describe --tags && true || true
+          echo Error [$?]
           if [ $? > 0 ]; then
             NEW_TAG=0.0.1
             echo "NEW_TAG=0.0.1" >> $GITHUB_ENV
