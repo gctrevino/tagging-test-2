@@ -6,7 +6,6 @@ on:
 jobs:
   tagging:
     name: Tagging
-    if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout the Repo
@@ -29,6 +28,15 @@ jobs:
           echo New Tag [ ${{ env.NEW_TAG }} ]
           echo Cur SHA [ ${{ github.sha }} ]
 
+  tagging2:
+    name: Tagging 2
+    runs-on: ubuntu-22.04
+    needs: tagging
+    steps:
+      - name: Checkout the Repo
+        uses: actions/checkout@v2
+        with:
+            fetch-depth: 0
 
       - name: Create Tag
         uses: actions/github-script@v3
@@ -47,27 +55,51 @@ jobs:
                 email: 'octocat@github.com',
                 date: '2022-06-17T14:53:35-07:00'
               }
-            }).then(() => {
-              github.git.createRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: "refs/tags/${{ env.NEW_TAG }}",
-                sha: context.sha
-              }).catch((error) => {
-                core.setFailed(`Failed tagging. Reason: ${error}`);
-              })
+            }).catch((error) => {
+              core.setFailed(`Failed tagging. Reason: ${error}`);
             });
 
-      - name: Test
-        run: |
-          git describe
-          git describe --all
+  tagging3:
+    name: Tagging 3
+    runs-on: ubuntu-22.04
+    needs: tagging2
+    steps:
+      - name: Checkout the Repo
+        uses: actions/checkout@v2
+        with:
+            fetch-depth: 0
+
+      - name: Create Tag
+        uses: actions/github-script@v3
+        with:
+          debug: true
+          script: |
+            github.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "refs/tags/${{ env.NEW_TAG }}",
+              sha: context.sha
+            }).catch((error) => {
+              core.setFailed(`Failed tagging. Reason: ${error}`);
+            });
+
 
   step2:
     name: Step 2
     runs-on: ubuntu-22.04
     if: ${{ always() }}
-    needs: tagging
+    needs: tagging3
     steps:
+      - name: Checkout the Repo
+        uses: actions/checkout@v2
+        with:
+            fetch-depth: 0
+
       - name: Next step
         run: echo Next step
+
+      - name: Test
+        run: |
+          git describe
+          git describe --tags
+          git describe --all
