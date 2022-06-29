@@ -3,6 +3,9 @@ name: Tagging Repo
 on:
   push:
 
+env:
+  NEW_TAG: 0.0.1
+
 jobs:
   tagging:
     name: Tagging
@@ -17,7 +20,7 @@ jobs:
         run: |
           git describe --tags && true || true
           if [ $? > 0 ]; then
-            echo "NEW_TAG=0.0.1"
+            NEW_TAG=0.0.1
             echo "NEW_TAG=0.0.1" >> $GITHUB_ENV
           else
             MAJOR=$(git describe --tags | cut -f 1 -d. | cut -f 1 -d-)
