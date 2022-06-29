@@ -1,0 +1,66 @@
+name: Tagging Repo
+
+on:
+  push:
+
+jobs:
+  tagging:
+    name: Tagging
+    if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout the Repo
+        uses: actions/checkout@v2
+        with:
+            fetch-depth: 0
+
+      - name: Tagging
+        run: |
+          MAJOR=$(git describe --tags | cut -f 1 -d. | cut -f 1 -d-)
+          MINOR=$(git describe --tags | cut -f 2 -d. | cut -f 1 -d-)
+          PATCH=$(( $(git describe --tags | cut -f 3 -d. | cut -f 1 -d-) + 1 ))
+          echo $MAJOR.$MINOR.$PATCH
+          echo ${{ github.sha }}
+          echo "NEW_TAG=$MAJOR.$MINOR.$PATCH" >> $GITHUB_ENV
+
+      - name: Create Tag
+        uses: actions/github-script@v3
+        with:
+          debug: true
+          script: |
+            github.git.createTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: '${{ env.NEW_TAG }}',
+              message: 'initial version',
+              object: context.sha,
+              type: 'commit',
+              tagger: {
+                name: 'Monalisa Octocat',
+                email: 'octocat@github.com',
+                date: '2022-06-17T14:53:35-07:00'
+              }
+            }).then(() => {
+              github.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: "refs/tags/${{ env.NEW_TAG }}",
+                sha: context.sha
+              }).catch((error) => {
+                core.setFailed(`Failed tagging. Reason: ${error}`);
+              })
+            });
+
+      - name: Test
+        run: |
+          git describe
+          git describe --all
+
+  step2:
+    name: Step 2
+    runs-on: ubuntu-22.04
+    if: ${{ always() }}
+    needs: tagging
+    steps:
+      - name: Next step
+        run: echo Next step
