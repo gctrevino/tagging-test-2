@@ -15,7 +15,8 @@ jobs:
 
       - name: Tagging
         run: |
-          git describe && true || true
+          CUR_TAG=$(git describe)
+          echo $CUR_TAG
           if [ $? > 0 ]; then
             echo "NEW_TAG=0.0.6" >> $GITHUB_ENV
           else
