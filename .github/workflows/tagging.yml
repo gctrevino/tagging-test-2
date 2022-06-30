@@ -6,7 +6,6 @@ on:
 jobs:
   tagging:
     name: Tagging
-    if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout the Repo
@@ -16,21 +15,30 @@ jobs:
 
       - name: Tagging
         run: |
-          git describe && true || true
-          if [ $? > 0 ]; then
-            echo "NEW_TAG=0.0.6" >> $GITHUB_ENV
+          CUR_TAG=$(git describe | grep -E '^[0-9]+\.[0-9]+.[0-9].+$')
+          echo Cur TAG [$CUR_TAG]
+          if [ "$CUR_TAG" == "" ]; then
+            echo "NEW_TAG=0.0.1" >> $GITHUB_ENV
           else
             MAJOR=$(git describe | cut -f 1 -d. | cut -f 1 -d-)
             MINOR=$(git describe | cut -f 2 -d. | cut -f 1 -d-)
-            PATCH=$(( $(git describe | cut -f 3 -d. | cut -f 1 -d-) + 5 ))
+            PATCH=$(( $(git describe | cut -f 3 -d. | cut -f 1 -d-) + 1 ))
+
+            echo MAJOR = [$MAJOR]
+            echo MINOR = [$MINOR]
+            echo PATCH = [$PATCH]
+
             echo "NEW_TAG=$MAJOR.$MINOR.$PATCH" >> $GITHUB_ENV
           fi
 
+      - name: Check New Tag
+        run: |
           echo New Tag [ ${{ env.NEW_TAG }} ]
           echo Cur SHA [ ${{ github.sha }} ]
 
       - name: Create Tag
         uses: actions/github-script@v3
+        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           debug: true
           script: |
