@@ -15,10 +15,10 @@ jobs:
 
       - name: Tagging
         run: |
-          CUR_TAG=$(git describe)
-          echo $CUR_TAG
-          if [ $? > 0 ]; then
-            echo "NEW_TAG=0.0.6" >> $GITHUB_ENV
+          CUR_TAG=$(git describe | grep -E '^[0-9]+\.[0-9]+.[0-9].+$')
+          echo Cur TAG [$CUR_TAG]
+          if [ "$CUR_TAG" == "" ]; then
+            echo "NEW_TAG=0.0.1" >> $GITHUB_ENV
           else
             MAJOR=$(git describe | cut -f 1 -d. | cut -f 1 -d-)
             MINOR=$(git describe | cut -f 2 -d. | cut -f 1 -d-)
