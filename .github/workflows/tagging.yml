@@ -31,6 +31,8 @@ jobs:
             echo "NEW_TAG=$MAJOR.$MINOR.$PATCH" >> $GITHUB_ENV
           fi
 
+      - name: Check New Tag
+        run: |
           echo New Tag [ ${{ env.NEW_TAG }} ]
           echo Cur SHA [ ${{ github.sha }} ]
 
