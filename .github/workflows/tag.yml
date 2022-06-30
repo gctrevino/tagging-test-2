@@ -1,0 +1,42 @@
+name: Release version
+
+on:
+  workflow_dispatch:
+    inputs:
+      newReleaseVersion:
+        description: 'New release version'
+        required: true
+        default: ''
+
+jobs:
+  package:
+    name: Release version
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Set tag
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            annotatedTag = await github.git.createTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: "${{ github.event.inputs.newReleaseVersion }}",
+              message: "${{ github.event.inputs.newReleaseVersion }}",
+              object: context.sha,
+              type: "commit",
+            })
+
+            await github.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "refs/tags/${{ github.event.inputs.newReleaseVersion }}",
+              sha: annotatedTag.data.sha
+            })
